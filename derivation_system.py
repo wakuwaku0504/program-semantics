@@ -1,3 +1,10 @@
+#判断クラス
+class Judgement():
+    def __init__(self,judgement,my_id=0,parent_id=-1):
+        self.judge = judgement
+        self.id = my_id 
+        self.parent = parent_id
+
 #ペアノ数
 class PeanoNum():
     def __init__(self,peano):
@@ -44,6 +51,9 @@ class PeanoNum():
 #genで子判断を返す
 class Nat():
     def __init__(self,judgement):
+        #対象の判断のid
+        self.id = judgement.id
+        #対象の判断の文字列
         self.judgement = judgement.judge
         self.child = list()
         self._str2tree()
@@ -69,7 +79,7 @@ class Nat():
         bara[4] = PeanoNum(bara[4])
         self.tree = bara
 
-    #どの規則を使って子判断生成
+    #どの規則を使って子判断生成するか判定
     def _parse(self):
         if self.tree[1]=="plus":
             if self.tree[0].s_num==0:
@@ -83,35 +93,52 @@ class Nat():
                 self.rule = "T-Succ"
 
     def _pZero(self):
-        self.child.append("")
+        child_id = self.id + 1 
+        child_jud = ""
+        child_judgement = Judgement(child_jud,child_id,self.id)
+        self.child.append(child_judgement)
 
     def _pSucc(self):
         tree = self.tree
+
         sn1 = tree[0]
         n1 = sn1.prev()
         n2 = tree[2]
         sn = tree[4]
         n = sn.prev()
+
         tree[0] = n1.toStr()
         tree[2] = n2.toStr()
         tree[4] = n.toStr()
-        self.child.append(' '.join(tree))
+        child_id = self.id + 1 
+        child_jud = ' '.join(tree)
+        child_judgement = Judgement(child_jud,child_id,self.id)
+        self.child.append(child_judgement)
 
     def _tZero(self):
-        self.child.append("")
+        child_id = self.id + 1 
+        child_jud = ""
+        child_judgement = Judgement(child_jud,child_id,self.id)
+        self.child.append(child_judgement)
 
     def _tSucc(self):
-        jud1 = self.tree
-        sn1 = jud1[0]
+        jud = self.tree
+
+        sn1 = jud[0]
         n1 = sn1.prev()
-        n2 = jud1[2]
-        n4 = jud1[4]
+        n2 = jud[2]
+        n4 = jud[4]
         n3 = n4.sub(n2)
-        jud1[0] = n1.toStr()
-        jud1[2] = n2.toStr()
-        jud1[4] = n3.toStr()
-        self.child.append(' '.join(jud1))
-        self.child.append('{0} plus {1} is {2}'.fomat(n2.toStr(),n3.toStr(),n4.toStr()))
+
+        child_id1 = self.id + 1
+        child_jud1 = '{0} times {1} is {2}'.format(n1.toStr(),n2.toStr(),n3.toStr())
+        child_judgement1 = Judgement(child_jud1,child_id1,self.id)
+        child_id2 = child_id1 + 1
+        child_jud2 = '{0} plus {1} is {2}'.format(n2.toStr(),n3.toStr(),n4.toStr())
+        child_judgement2 = Judgement(child_jud2,child_id2,self.id)
+        self.child.append(child_judgement1)
+        self.child.append(child_judgement2)
+
 
         
 
