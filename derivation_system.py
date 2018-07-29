@@ -1,9 +1,12 @@
 #判断クラス
 class Judgement():
-    def __init__(self,judgement,my_id=0,parent_id=-1):
-        self.judge = judgement
+    def __init__(self,judgement,my_id=0,rule=None):
+        #この判断を導いた規則
+        self.rule = rule
+        self.str = judgement
         self.id = my_id 
-        self.parent = parent_id
+        #直下の子の判断のid
+        self.childs_id = list()
 
 #ペアノ数
 class PeanoNum():
@@ -47,19 +50,49 @@ class PeanoNum():
             peano += ")"
         return peano
 
+#システムのベースクラス
+#1.ルート判断から子判断を生成し，スタックする
+#2.ルート判断の文字列を生成して子判断のidを文字列に埋め込む
+#3.子判断が存在しなかった場合，文字列を埋め込まずカッコを閉じる
+#4.self.stringのidを生成した文字列で置き換える
+#3.スタックから判断を一つポップし，それを対象として
+#3.葉ノードにたどり着いたら
+class System():
+    def __inint__(self,judgement):
+        #今対象としている判断
+        self.pointer = judgement
+        #子判断をスタックする
+        self.childs = list()
+        #最終的な出力結果と成る文字列
+        self.string = "0"
+
+    def run(self):
+        self.stack()
+        #self.stringのidを置き換える文字列を生成
+        j_id = self.pointer.id
+        j_str = self.pointer.str
+        j_rule = self.pointer.rule
+        jud = j_str + "by {} {".format(j_rule)
+        if self.pointer.childs_id==[]:
+            jud += "}"
+        else:
+            for child_id in self.pointer.childs_id:
+                jud += str(child_id) + "; "
+
+        self.string.replace(str(j_id),jud)
+        self.pointer = self.childs.pop()
+        
+        self.run()
+        
 #self.childに子判断の文字列を保持
 #genで子判断を返す
-class Nat():
+class Nat(System):
     def __init__(self,judgement):
-        #対象の判断のid
-        self.id = judgement.id
-        #対象の判断の文字列
-        self.judgement = judgement.judge
-        self.child = list()
+        super().__init__(judgement)
         self._str2tree()
 
-    #規則を適用し，子判断を返す                
-    def gen(self):
+    #規則を適用し，子判断をスタックする                
+    def stack(self):
         self._parse()
         if self.rule=="P-Zero":
             self._pZero()
@@ -69,11 +102,10 @@ class Nat():
             self._tZero()
         elif self.rule=="T-Succ":
             self._tSucc()
-        return self.rule,self.child
 
     #文字列を扱いやすい形式に
     def _str2tree(self):
-        bara = self.judgement.split()
+        bara = self.pointer.str.split()
         bara[0] = PeanoNum(bara[0])
         bara[2] = PeanoNum(bara[2])
         bara[4] = PeanoNum(bara[4])
@@ -93,10 +125,7 @@ class Nat():
                 self.rule = "T-Succ"
 
     def _pZero(self):
-        child_id = self.id + 1 
-        child_jud = ""
-        child_judgement = Judgement(child_jud,child_id,self.id)
-        self.child.append(child_judgement)
+        self.pointer.rule = "P-Zero"
 
     def _pSucc(self):
         tree = self.tree
@@ -113,13 +142,12 @@ class Nat():
         child_id = self.id + 1 
         child_jud = ' '.join(tree)
         child_judgement = Judgement(child_jud,child_id,self.id)
-        self.child.append(child_judgement)
+        self.childs.append(child_judgement)
+        self.pointer.rule = "P-Succ"
+        self.pointer.childs_id.append(child_id)
 
     def _tZero(self):
-        child_id = self.id + 1 
-        child_jud = ""
-        child_judgement = Judgement(child_jud,child_id,self.id)
-        self.child.append(child_judgement)
+        self.pointer.rule = "T-Zero"
 
     def _tSucc(self):
         jud = self.tree
@@ -132,15 +160,15 @@ class Nat():
 
         child_id1 = self.id + 1
         child_jud1 = '{0} times {1} is {2}'.format(n1.toStr(),n2.toStr(),n3.toStr())
-        child_judgement1 = Judgement(child_jud1,child_id1,self.id)
+        child_judgement1 = Judgement(child_jud1,child_id1,self.id,"T-Succ")
         child_id2 = child_id1 + 1
         child_jud2 = '{0} plus {1} is {2}'.format(n2.toStr(),n3.toStr(),n4.toStr())
         child_judgement2 = Judgement(child_jud2,child_id2,self.id)
-        self.child.append(child_judgement1)
-        self.child.append(child_judgement2)
-
-
-        
+        self.childs.append(child_judgement1)
+        self.childs.append(child_judgement2)
+        self.pointer.rule = "T-Succ"
+        self.pointer.childs_id.append(child_id1)
+        self.pointer.childs_id.append(child_id2)
 
 if __name__=='__main__':
     #peano = "S(S(S(S(Z))))"
