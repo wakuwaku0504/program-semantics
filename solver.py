@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 import argparse
 from derivation_system import * 
 
@@ -17,23 +17,8 @@ def main():
     if args.system=="Nat":
         system = Nat(root_judgement)
     
-    child = system.gen()
-    while(1):
-
-
-
-    #  childs = list()
-    #  while(1):
-        #  rule, child = system.gen()
-        #  print(
-        #  while(1):
-
-    child = system.gen()
-    for i in range(len(child)):
-        print(child[i].judge)
-        print(child[i].id)
-        print(child[i].parent)
-        print(child[i].rule)
+    system.run()
+    print(system.string)
 
 
 if __name__=="__main__":
