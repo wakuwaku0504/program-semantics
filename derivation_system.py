@@ -1,3 +1,7 @@
+#  class Tree():
+    #  def __init__(self,tree0,tree1,op):
+        #  self.top = 
+
 #判断クラス
 class Judgement():
     def __init__(self,judgement,my_id=0,rule=None):
@@ -51,21 +55,30 @@ class PeanoNum():
         return peano
 
 #システムのベースクラス
-#1.ルート判断から子判断を生成し，スタックする
-#2.ルート判断の文字列を生成して子判断のidを文字列に埋め込む
+#1.self.pointerの判断からself.stackによって子判断を生成し，self.childsにスタックする
+#2.self.pointerの判断の文字列を生成して子判断のidを文字列に埋め込む
 #3.子判断が存在しなかった場合，文字列を埋め込まずカッコを閉じる
-#4.self.stringのidを生成した文字列で置き換える
-#3.スタックから判断を一つポップし，それを対象として
-#3.葉ノードにたどり着いたら
+#4.self.stringのidを生成した文字列で置き換えたものを新たなself.stringとする
+#5.self.childsスタックから判断を一つポップし，それを対象としてself.pointerに代入
+#6.1に戻る
+#7.self.childsが空になったら終了
+#self.stackはシステム独自に定義する
+#self.stackは，self.pointerを導くルールと判断（子判断）を
+#解析し，
+#・子判断はself.childsにスタック
+#・self.pointer.childs_idに子判断のidをappend
+#・self.pointer.ruleにルールを代入
+#する
 class System():
     def __init__(self,judgement):
         #今対象としている判断
         self.pointer = judgement
         #子判断をスタックする
         self.childs = list()
-        #最終的な出力結果と成る文字列
+        #最終的な出力結果となる文字列
         self.string = "0"
 
+    #解析実行
     def run(self):
         self.stack()
         #self.stringのidを置き換える文字列を生成
@@ -76,7 +89,6 @@ class System():
         if not self.pointer.childs_id==[]:
             for child_id in self.pointer.childs_id:
                 jud += str(child_id) + "; "
-
         jud += "}"
         self.string = self.string.replace(str(j_id),jud)
         if self.childs==[]:
@@ -84,15 +96,15 @@ class System():
         self.pointer = self.childs.pop()
         self.run()
         
-#self.childに子判断の文字列を保持
-#genで子判断を返す
 class Nat(System):
     def __init__(self,judgement):
         super().__init__(judgement)
-        self._str2tree()
+        #項を分割する文字列
+        self.splitter = ["plus","times","is"]
 
     #規則を適用し，子判断をスタックする                
     def stack(self):
+        self._str2tree()
         self._parse()
         if self.rule=="P-Zero":
             self._pZero()
@@ -170,6 +182,16 @@ class Nat(System):
         self.pointer.rule = "T-Succ"
         self.pointer.childs_id.append(child_id1)
         self.pointer.childs_id.append(child_id2)
+
+#  class EvalNatExp(Nat):
+    #  def __init__(self,judgement)
+        #  super().__init__(judgement)
+        #  self.splitter.append("evalto")
+
+    #  def 
+
+
+
 
 if __name__=='__main__':
     #peano = "S(S(S(S(Z))))"
